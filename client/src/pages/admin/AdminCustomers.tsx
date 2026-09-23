@@ -1,0 +1,1 @@
+import {Card,Table,Typography} from 'antd';export default function AdminCustomers(){return <Card className="admin-card"><Typography.Title level={4}>Customers</Typography.Title><Table dataSource={[]} columns={[{title:'Name',dataIndex:'name'},{title:'Email',dataIndex:'email'},{title:'Orders',dataIndex:'orders'},{title:'Joined',dataIndex:'createdAt'}]}/></Card>}

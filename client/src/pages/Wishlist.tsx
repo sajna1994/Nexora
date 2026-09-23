@@ -1,0 +1,1 @@
+import {Empty,Typography} from 'antd';export default function Wishlist(){return <div className="page"><Typography.Title>Wishlist</Typography.Title><Empty description="Your wishlist is waiting for something special."/></div>}

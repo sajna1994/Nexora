@@ -1,44 +1,111 @@
-import React from 'react';
-
-import { Layout, Input, Badge, Button, Drawer, Menu } from 'antd';
+import React, { useState } from "react";
+import {
+  Layout,
+  Input,
+  Badge,
+  Button,
+  Drawer,
+  Menu,
+  Dropdown,
+  Avatar,
+  Space,
+  message,
+} from "antd";
 import {
   SearchOutlined,
   ShoppingOutlined,
   UserOutlined,
   MenuOutlined,
   HeartOutlined,
-} from '@ant-design/icons';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+  DashboardOutlined,
+  LogoutOutlined,
+  InstagramOutlined,
+  TwitterOutlined,
+  FacebookOutlined,
+  YoutubeOutlined,
+} from "@ant-design/icons";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import api from "../lib/api";
 
 const { Header, Content, Footer } = Layout;
 
 export default function StoreLayout() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
+  const { count } = useCart();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+
+  const userMenu = {
+    items: isAuthenticated
+      ? [
+          {
+            key: "profile",
+            label: "My Profile",
+            icon: <UserOutlined />,
+            onClick: () => nav("/profile"),
+          },
+          {
+            key: "orders",
+            label: "My Orders",
+            icon: <ShoppingOutlined />,
+            onClick: () => nav("/orders"),
+          },
+          ...(isAdmin
+            ? [
+                { type: "divider" as const },
+                {
+                  key: "admin",
+                  label: "Admin Panel",
+                  icon: <DashboardOutlined />,
+                  onClick: () => nav("/admin"),
+                },
+              ]
+            : []),
+          { type: "divider" as const },
+          {
+            key: "logout",
+            label: "Logout",
+            icon: <LogoutOutlined />,
+            danger: true,
+            onClick: () => {
+              logout();
+              nav("/");
+            },
+          },
+        ]
+      : [
+          {
+            key: "login",
+            label: "Sign in",
+            onClick: () => nav("/login"),
+          },
+          {
+            key: "register",
+            label: "Create account",
+            onClick: () => nav("/register"),
+          },
+        ],
+  };
 
   return (
-    <Layout
-      style={{
-        minHeight: '100vh',
-        background: '#faf9f7',
-      }}
-    >
+    <Layout style={{ minHeight: "100vh", background: "#faf9f7" }}>
       <Header
         style={{
           height: 76,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 24,
-          background: '#fff',
-          borderBottom: '1px solid #eee',
-          padding: '0 24px',
-          position: 'sticky',
+          background: "#fff",
+          borderBottom: "1px solid #eee",
+          padding: "0 24px",
+          position: "sticky",
           top: 0,
           zIndex: 20,
         }}
       >
-        {/* Mobile Menu */}
+        {/* Mobile menu button */}
         <Button
           type="text"
           icon={<MenuOutlined />}
@@ -47,66 +114,59 @@ export default function StoreLayout() {
         />
 
         {/* Logo */}
-        <div
-          onClick={() => nav('/')}
+        <img
+          src="/logoo.png"
+          alt="NEXORA"
+          onClick={() => nav("/")}
           style={{
-            fontFamily: 'Manrope',
-            fontSize: 25,
-            fontWeight: 800,
-            letterSpacing: 6,
-            cursor: 'pointer',
+            height: 54,
+            width: "auto",
+            cursor: "pointer",
+            objectFit: "contain",
           }}
-        >
-          NEXORA
-        </div>
+        />
 
         {/* Search */}
-        <div
-          style={{
-            flex: 1,
-            maxWidth: 560,
-            margin: '0 auto',
-          }}
-        >
+        <div style={{ flex: 1, maxWidth: 560, margin: "0 auto" }}>
           <Input
             size="large"
             prefix={<SearchOutlined />}
             placeholder="Search products, brands and categories..."
             onPressEnter={(e) =>
-              nav(
-                '/shop?search=' +
-                  encodeURIComponent(e.currentTarget.value)
-              )
+              nav("/shop?search=" + encodeURIComponent(e.currentTarget.value))
             }
           />
         </div>
 
         {/* Actions */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-          }}
-        >
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Button
             type="text"
             icon={<HeartOutlined />}
-            onClick={() => nav('/wishlist')}
+            onClick={() => nav("/wishlist")}
           />
 
-          <Button
-            type="text"
-            icon={<UserOutlined />}
-            onClick={() => nav('/login')}
-          />
-
-          <Badge count={0} showZero>
+          <Badge count={count} showZero>
             <Button
               type="text"
               icon={<ShoppingOutlined />}
-              onClick={() => nav('/cart')}
+              onClick={() => nav("/cart")}
             />
           </Badge>
+
+          {isAuthenticated ? (
+            <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>
+              <Space style={{ cursor: "pointer", paddingLeft: 8 }}>
+                <Avatar size="small" style={{ background: "#b8892d" }}>
+                  {user?.name?.[0]?.toUpperCase()}
+                </Avatar>
+              </Space>
+            </Dropdown>
+          ) : (
+            <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>
+              <Button type="text" icon={<UserOutlined />} />
+            </Dropdown>
+          )}
         </div>
       </Header>
 
@@ -115,59 +175,181 @@ export default function StoreLayout() {
       </Content>
 
       <Footer className="footer">
-        <div
-          style={{
-            maxWidth: 1280,
-            margin: 'auto',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 28,
-              fontWeight: 800,
-              letterSpacing: 5,
-              color: '#fff',
-            }}
-          >
-            NEXORA
+        <div className="footer-inner">
+          {/* Newsletter */}
+          <div className="footer-newsletter">
+            <div className="footer-newsletter-text">
+              <h3>Join the NEXORA circle</h3>
+              <p>Get 10% off your first order + early access to new drops.</p>
+            </div>
+            <form
+              className="footer-newsletter-form"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const input = e.currentTarget.elements[0] as HTMLInputElement;
+                const email = input.value.trim();
+                if (!email) return;
+
+                try {
+                  await api.post("/newsletter", { email });
+                  message.success(
+                    "Subscribed! Check your inbox for a welcome gift."
+                  );
+                  input.value = "";
+                } catch (err: any) {
+                  message.error(
+                    err.response?.data?.message || "Could not subscribe"
+                  );
+                }
+              }}
+            >
+              <input type="email" placeholder="Enter your email" required />
+              <button type="submit">Subscribe</button>
+            </form>
           </div>
 
-          <p>Shop more. Live better.</p>
+          {/* Main grid */}
+          <div className="footer-grid">
+            {/* Brand column */}
+            <div className="footer-brand">
+              <img src="/logoo.png" alt="NEXORA" />
+              <p className="footer-brand-text">
+                Curated essentials for a better everyday. Premium footwear,
+                performance nutrition and modern lifestyle — all in one place.
+              </p>
+              <div className="footer-socials">
+                <a aria-label="Instagram">
+                  <InstagramOutlined />
+                </a>
+                <a aria-label="Twitter">
+                  <TwitterOutlined />
+                </a>
+                <a aria-label="Facebook">
+                  <FacebookOutlined />
+                </a>
+                <a aria-label="YouTube">
+                  <YoutubeOutlined />
+                </a>
+              </div>
+            </div>
+
+            {/* Shop */}
+            <div className="footer-col">
+              <h4>Shop</h4>
+              <ul>
+                <li>
+                  <a onClick={() => nav("/shop?category=shoes")}>Shoes</a>
+                </li>
+                <li>
+                  <a onClick={() => nav("/shop?category=gym")}>
+                    Gym & Supplements
+                  </a>
+                </li>
+                <li>
+                  <a onClick={() => nav("/shop?category=fashion")}>Fashion</a>
+                </li>
+                <li>
+                  <a onClick={() => nav("/shop?category=cosmetics")}>
+                    Cosmetics
+                  </a>
+                </li>
+                <li>
+                  <a onClick={() => nav("/shop")}>All Products</a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Help */}
+            <div className="footer-col">
+              <h4>Help</h4>
+              <ul>
+                <li>
+                  <a>Track Order</a>
+                </li>
+                <li>
+                  <a>Shipping Info</a>
+                </li>
+                <li>
+                  <a>Returns & Refunds</a>
+                </li>
+                <li>
+                  <a>Size Guide</a>
+                </li>
+                <li>
+                  <a>Contact Us</a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div className="footer-col">
+              <h4>Company</h4>
+              <ul>
+                <li>
+                  <a>About NEXORA</a>
+                </li>
+                <li>
+                  <a>Careers</a>
+                </li>
+                <li>
+                  <a>Press</a>
+                </li>
+                <li>
+                  <a>Privacy Policy</a>
+                </li>
+                <li>
+                  <a>Terms of Service</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="footer-bottom">
+            <div className="footer-copy">
+              © {new Date().getFullYear()} NEXORA. All rights reserved.
+            </div>
+
+            <div className="footer-policies">
+              <a>Privacy</a>
+              <a>Terms</a>
+              <a>Cookies</a>
+              <a>Sitemap</a>
+            </div>
+
+            <div className="footer-payments">
+              <span>VISA</span>
+              <span>MASTERCARD</span>
+              <span>UPI</span>
+              <span>PAYPAL</span>
+            </div>
+          </div>
         </div>
       </Footer>
 
-      {/* Mobile Drawer */}
+      {/* Mobile drawer */}
       <Drawer
-        title="NEXORA"
         open={open}
         onClose={() => setOpen(false)}
+        title={
+          <img
+            src="/logoo.png"
+            alt="NEXORA"
+            style={{ height: 32, width: "auto", objectFit: "contain" }}
+          />
+        }
       >
         <Menu
           items={[
-            {
-              key: 'shop',
-              label: 'Shop',
-            },
-            {
-              key: 'shoes',
-              label: 'Shoes',
-            },
-            {
-              key: 'gym',
-              label: 'Gym & Supplements',
-            },
-            {
-              key: 'fashion',
-              label: 'Fashion',
-            },
-            {
-              key: 'cosmetics',
-              label: 'Cosmetics',
-            },
+            { key: "shop", label: "Shop" },
+            { key: "shoes", label: "Shoes" },
+            { key: "gym", label: "Gym & Supplements" },
+            { key: "fashion", label: "Fashion" },
+            { key: "cosmetics", label: "Cosmetics" },
           ]}
           onClick={({ key }) => {
             setOpen(false);
-            nav('/shop?category=' + key);
+            nav("/shop?category=" + key);
           }}
         />
       </Drawer>

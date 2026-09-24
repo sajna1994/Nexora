@@ -1,57 +1,56 @@
-import { Button, Col, Row } from "antd";
+import { Button, Col, Row, Spin } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import ProductCard, { type Product } from "../components/ProductCard";
-const products: Product[] = [
-  {
-    _id: "shoe-1",
-    name: "Aero Street Runner",
-    price: 2999,
-    discountPrice: 2499,
-    category: "Shoes",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    _id: "protein-1",
-    name: "Whey Protein 1 KG",
-    price: 3999,
-    discountPrice: 3499,
-    category: "Gym & Supplements",
-    image:
-      "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    _id: "shoe-2",
-    name: "Minimal Court White",
-    price: 2799,
-    category: "Shoes",
-    image:
-      "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    _id: "creatine-1",
-    name: "Creatine Monohydrate",
-    price: 1999,
-    category: "Gym & Supplements",
-    image:
-      "https://images.unsplash.com/photo-1579722821273-0f6c5e3a5e1c?auto=format&fit=crop&w=900&q=80",
-  },
-];
+import api from "../lib/api";
+
 export default function Home() {
   const nav = useNavigate();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .get("/products")
+      .then((res) => {
+        const mapped = res.data.map((p: any) => ({
+          _id: p._id,
+          name: p.name,
+          price: p.price,
+          discountPrice: p.discountPrice,
+          category: p.category?.name || "Uncategorized",
+          image: p.images?.[0] || "https://via.placeholder.com/400",
+        }));
+        setProducts(mapped.slice(0, 4));
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="page">
-      <section className="hero">
-        <div>
-          <div className="gold" style={{ letterSpacing: 4 }}>
-            NEXORA / NEW COLLECTION
-          </div>
-          <h1>
-            Everything you
-            <br />
-            <span className="gold">want.</span>
-          </h1>
+     <section className="hero">
+  <div>
+    <img
+      src="/logo.png"
+      alt="NEXORA"
+      style={{
+        height: 100,
+        width: 'auto',
+        objectFit: 'contain',
+        marginBottom: 24,
+      }}
+    />
+    <div className="gold" style={{ letterSpacing: 4 }}>
+      NEXORA / NEW COLLECTION
+    </div>
+    <h1>
+      Everything you
+      <br />
+      <span className="gold">want.</span>
+    </h1>
+    ...
           <p>
             A refined shopping experience for everyday essentials, fitness,
             fashion and everything coming next.
@@ -66,6 +65,7 @@ export default function Home() {
           </Button>
         </div>
       </section>
+
       <section style={{ marginTop: 64 }}>
         <div className="section-title">
           <h2>Shop by category</h2>
@@ -76,13 +76,17 @@ export default function Home() {
         <Row gutter={[16, 16]}>
           {["Shoes", "Gym & Supplements", "Fashion", "Cosmetics"].map((x) => (
             <Col xs={24} sm={12} md={6} key={x}>
-              <div className="category-tile">
+              <div
+                className="category-tile"
+                onClick={() => nav("/shop?category=" + x)}
+              >
                 <h3 style={{ margin: 0, color: "#fff" }}>{x}</h3>
               </div>
             </Col>
           ))}
         </Row>
       </section>
+
       <section style={{ marginTop: 64 }}>
         <div className="section-title">
           <div>
@@ -92,13 +96,17 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <Row gutter={[20, 20]}>
-          {products.map((p) => (
-            <Col xs={24} sm={12} lg={6} key={p._id}>
-              <ProductCard p={p} />
-            </Col>
-          ))}
-        </Row>
+        {loading ? (
+          <Spin size="large" />
+        ) : (
+          <Row gutter={[20, 20]}>
+            {products.map((p) => (
+              <Col xs={24} sm={12} lg={6} key={p._id}>
+                <ProductCard p={p} />
+              </Col>
+            ))}
+          </Row>
+        )}
       </section>
     </div>
   );

@@ -1,5 +1,6 @@
 import { Card, Typography, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
+
 export type Product = {
   _id: string;
   name: string;
@@ -9,6 +10,7 @@ export type Product = {
   category: string;
   badge?: string;
 };
+
 export default function ProductCard({ p }: { p: Product }) {
   const nav = useNavigate();
   return (
@@ -18,7 +20,7 @@ export default function ProductCard({ p }: { p: Product }) {
       cover={<img className="product-image" src={p.image} alt={p.name} />}
       onClick={() => nav("/product/" + p._id)}
     >
-      <Tag>{p.category}</Tag>
+      <Tag>{typeof p.category === "string" ? p.category : (p.category as any)?.name}</Tag>
       <Typography.Title level={5} style={{ margin: "12px 0 8px" }}>
         {p.name}
       </Typography.Title>

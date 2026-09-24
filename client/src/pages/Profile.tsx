@@ -1,1 +1,32 @@
-import {Card,Form,Input,Typography,Button} from 'antd';export default function Profile(){return <div className="page" style={{maxWidth:800}}><Typography.Title>My Profile</Typography.Title><Card bordered={false}><Form layout="vertical"><Form.Item label="Name"><Input defaultValue="Customer"/></Form.Item><Form.Item label="Email"><Input/></Form.Item><Form.Item label="Phone"><Input/></Form.Item><Button type="primary">Save changes</Button></Form></Card></div>}
+import { Card, Form, Input, Typography, Button, message } from "antd";
+import { useAuth } from "../context/AuthContext";
+
+export default function Profile() {
+  const { user } = useAuth();
+
+  return (
+    <div className="page" style={{ maxWidth: 800 }}>
+      <Typography.Title>My Profile</Typography.Title>
+      <Card bordered={false}>
+        <Form
+          layout="vertical"
+          initialValues={{ name: user?.name, email: user?.email }}
+          onFinish={() => message.success("Profile saved")}
+        >
+          <Form.Item label="Name" name="name">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Email" name="email">
+            <Input disabled />
+          </Form.Item>
+          <Form.Item label="Phone" name="phone">
+            <Input />
+          </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Save changes
+          </Button>
+        </Form>
+      </Card>
+    </div>
+  );
+}

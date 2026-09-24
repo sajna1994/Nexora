@@ -1,1 +1,24 @@
-import {Router} from 'express';import Category from '../models/Category';const r=Router();r.get('/',async(_,res)=>res.json(await Category.find({isActive:true}).sort({name:1})));r.post('/',async(req,res)=>res.status(201).json(await Category.create(req.body)));r.put('/:id',async(req,res)=>res.json(await Category.findByIdAndUpdate(req.params.id,req.body,{new:true})));r.delete('/:id',async(req,res)=>{await Category.findByIdAndDelete(req.params.id);res.json({message:'Deleted'})});export default r;
+import { Router } from "express";
+import Category from "../models/Category";
+import { requireAuth, requireAdmin } from "../../middleware/auth";
+
+const r = Router();
+
+r.get("/", async (_, res) =>
+  res.json(await Category.find({ isActive: true }).sort({ name: 1 }))
+);
+
+r.post("/", requireAuth, requireAdmin, async (req, res) =>
+  res.status(201).json(await Category.create(req.body))
+);
+
+r.put("/:id", requireAuth, requireAdmin, async (req, res) =>
+  res.json(await Category.findByIdAndUpdate(req.params.id, req.body, { new: true }))
+);
+
+r.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
+  await Category.findByIdAndDelete(req.params.id);
+  res.json({ message: "Deleted" });
+});
+
+export default r;

@@ -5,9 +5,10 @@ import { ConfigProvider } from "antd";
 
 import App from "./App";
 import "./styles/global.css";
-ReactDOM.createRoot(
-  document.getElementById("root")!
-).render(
+import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <ConfigProvider
@@ -19,7 +20,11 @@ ReactDOM.createRoot(
           },
         }}
       >
-        <App />
+        <AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AuthProvider>
       </ConfigProvider>
     </BrowserRouter>
   </React.StrictMode>

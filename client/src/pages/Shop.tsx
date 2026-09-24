@@ -12,7 +12,13 @@ export default function Shop() {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "all");
   const [sort, setSort] = useState("featured");
+useEffect(() => {
+  const sp = searchParams.get("category") || "all";
+  if (sp !== category) setCategory(sp);
 
+  const sq = searchParams.get("search") || "";
+  if (sq !== search) setSearch(sq);
+}, [searchParams]);
   useEffect(() => {
     api.get("/categories").then((res) =>
       setCategories([

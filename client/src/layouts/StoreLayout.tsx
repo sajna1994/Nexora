@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import {
   Layout,
   Input,
@@ -38,7 +39,11 @@ export default function StoreLayout() {
   const { count } = useCart();
   const { count: wishCount } = useWishlist();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+const [footerCategories, setFooterCategories] = useState<any[]>([]);
 
+useEffect(() => {
+  api.get("/categories").then((res) => setFooterCategories(res.data));
+}, []);
   const userMenu = {
     items: isAuthenticated
       ? [
@@ -221,29 +226,54 @@ export default function StoreLayout() {
                 Curated essentials for a better everyday. Premium footwear,
                 performance nutrition and modern lifestyle — all in one place.
               </p>
-              <div className="footer-socials">
-                <a aria-label="Instagram">
-                  <InstagramOutlined />
-                </a>
-                <a aria-label="Twitter">
-                  <TwitterOutlined />
-                </a>
-                <a aria-label="Facebook">
-                  <FacebookOutlined />
-                </a>
-                <a aria-label="YouTube">
-                  <YoutubeOutlined />
-                </a>
-              </div>
+             <div className="footer-socials">
+  <a
+    href="https://instagram.com/nexora"
+    target="_blank"
+    rel="noreferrer noopener"
+    aria-label="Instagram"
+  >
+    <InstagramOutlined />
+  </a>
+  <a
+    href="https://twitter.com/nexora"
+    target="_blank"
+    rel="noreferrer noopener"
+    aria-label="Twitter"
+  >
+    <TwitterOutlined />
+  </a>
+  <a
+    href="https://facebook.com/nexora"
+    target="_blank"
+    rel="noreferrer noopener"
+    aria-label="Facebook"
+  >
+    <FacebookOutlined />
+  </a>
+  <a
+    href="https://youtube.com/@nexora"
+    target="_blank"
+    rel="noreferrer noopener"
+    aria-label="YouTube"
+  >
+    <YoutubeOutlined />
+  </a>
+</div>
             </div>
 
             {/* Shop */}
-            <div className="footer-col">
-              <h4>Shop</h4>
-              <ul>
-                <li>
-                  <a onClick={() => nav("/shop?category=shoes")}>Shoes</a>
-                </li>
+           <div className="footer-col">
+  <h4>Shop</h4>
+  <ul>
+    {footerCategories.slice(0, 4).map((c) => (
+      <li key={c._id}>
+        <a onClick={() => nav(`/shop?category=${c._id}`)}>{c.name}</a>
+      </li>
+    ))}
+    <li>
+      <a onClick={() => nav("/shop")}>All Products</a>
+    </li>
                 <li>
                   <a onClick={() => nav("/shop?category=gym")}>
                     Gym & Supplements
@@ -263,49 +293,49 @@ export default function StoreLayout() {
               </ul>
             </div>
 
-            {/* Help */}
-            <div className="footer-col">
-              <h4>Help</h4>
-              <ul>
-                <li>
-                  <a>Track Order</a>
-                </li>
-                <li>
-                  <a>Shipping Info</a>
-                </li>
-                <li>
-                  <a>Returns & Refunds</a>
-                </li>
-                <li>
-                  <a>Size Guide</a>
-                </li>
-                <li>
-                  <a>Contact Us</a>
-                </li>
-              </ul>
-            </div>
+           {/* Help */}
+<div className="footer-col">
+  <h4>Help</h4>
+  <ul>
+    <li>
+      <a onClick={() => nav("/orders")}>Track Order</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/shipping")}>Shipping Info</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/returns")}>Returns & Refunds</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/size-guide")}>Size Guide</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/contact")}>Contact Us</a>
+    </li>
+  </ul>
+</div>
 
-            {/* Company */}
-            <div className="footer-col">
-              <h4>Company</h4>
-              <ul>
-                <li>
-                  <a>About NEXORA</a>
-                </li>
-                <li>
-                  <a>Careers</a>
-                </li>
-                <li>
-                  <a>Press</a>
-                </li>
-                <li>
-                  <a>Privacy Policy</a>
-                </li>
-                <li>
-                  <a>Terms of Service</a>
-                </li>
-              </ul>
-            </div>
+           {/* Company */}
+<div className="footer-col">
+  <h4>Company</h4>
+  <ul>
+    <li>
+      <a onClick={() => nav("/info/about")}>About NEXORA</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/careers")}>Careers</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/press")}>Press</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/privacy")}>Privacy Policy</a>
+    </li>
+    <li>
+      <a onClick={() => nav("/info/terms")}>Terms of Service</a>
+    </li>
+  </ul>
+</div>
           </div>
 
           {/* Bottom bar */}
@@ -314,12 +344,12 @@ export default function StoreLayout() {
               © {new Date().getFullYear()} NEXORA. All rights reserved.
             </div>
 
-            <div className="footer-policies">
-              <a>Privacy</a>
-              <a>Terms</a>
-              <a>Cookies</a>
-              <a>Sitemap</a>
-            </div>
+           <div className="footer-policies">
+  <a onClick={() => nav("/info/privacy")}>Privacy</a>
+  <a onClick={() => nav("/info/terms")}>Terms</a>
+  <a onClick={() => nav("/info/cookies")}>Cookies</a>
+  <a onClick={() => nav("/info/sitemap")}>Sitemap</a>
+</div>
 
             <div className="footer-payments">
               <span>VISA</span>

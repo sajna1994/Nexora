@@ -5,6 +5,7 @@ import {
   AppstoreOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
+  MailOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
@@ -76,6 +77,8 @@ export default function AdminLayout() {
               icon: <TeamOutlined />,
               label: "Customers",
             },
+                { key: "/admin/newsletter", icon: <MailOutlined />, label: "Newsletter" },   // ← ADD
+
           ]}
           onClick={({ key }) => nav(key)}
         />

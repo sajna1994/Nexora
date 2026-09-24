@@ -142,21 +142,21 @@ export default function StoreLayout() {
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {/* Before */}
-<Button
-  type="text"
-  icon={<HeartOutlined />}
-  onClick={() => nav("/wishlist")}
-/>
-
-{/* After — with badge */}
-<Badge count={wishCount} showZero={false} color="#c9a45c">
+          <Badge count={wishCount} showZero={false} color="#c9a45c">
   <Button
     type="text"
     icon={<HeartOutlined />}
     onClick={() => nav("/wishlist")}
   />
 </Badge>
+
+          <Badge count={count} showZero>
+            <Button
+              type="text"
+              icon={<ShoppingOutlined />}
+              onClick={() => nav("/cart")}
+            />
+          </Badge>
 
           {isAuthenticated ? (
             <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>

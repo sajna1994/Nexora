@@ -16,7 +16,6 @@ import api from "../lib/api";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
-  const nav = useNavigate();
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -24,6 +23,7 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<any>({});
+  const nav = useNavigate();
 
   const { addToCart } = useCart();
   const { isAdmin, isAuthenticated } = useAuth();

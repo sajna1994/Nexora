@@ -7,6 +7,7 @@ import App from "./App";
 import "./styles/global.css";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { WishlistProvider } from "./context/WishlistContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -22,7 +23,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       >
         <AuthProvider>
           <CartProvider>
-            <App />
+          <WishlistProvider>
+      <App />
+    </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </ConfigProvider>

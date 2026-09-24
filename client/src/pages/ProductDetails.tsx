@@ -9,12 +9,14 @@ import {
   Spin,
   message,
 } from "antd";
-import { ShoppingOutlined, HeartOutlined } from "@ant-design/icons";
-import { useParams } from "react-router-dom";
+import { HeartOutlined, HeartFilled, ShoppingOutlined } from "@ant-design/icons";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../lib/api";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useWishlist } from "../context/WishlistContext";
+  const nav = useNavigate();
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -25,7 +27,20 @@ export default function ProductDetails() {
 
   const { addToCart } = useCart();
   const { isAdmin, isAuthenticated } = useAuth();
+const { has, toggle } = useWishlist();
 
+const handleWishlist = () => {
+     if (!isAuthenticated) {
+    message.info("Sign in to save to wishlist");
+    nav("/login");
+    return;
+  }
+  if (!product) return;
+  toggle(product);
+  message.success(
+    has(product._id) ? "Removed from wishlist" : "Added to wishlist"
+  );
+};
   useEffect(() => {
     if (!id) return;
     api
@@ -123,24 +138,30 @@ export default function ProductDetails() {
             onChange={(v) => setQuantity(v || 1)}
           />
 
-          <div style={{ marginTop: 28 }}>
-            <Space>
-              {!isAdmin && (
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<ShoppingOutlined />}
-                  onClick={handleAdd}
-                >
-                  Add to cart
-                </Button>
-              )}
+         <div style={{ marginTop: 28 }}>
+  <Space>
+    {!isAdmin && (
+      <Button
+        type="primary"
+        size="large"
+        icon={<ShoppingOutlined />}
+        onClick={handleAdd}
+      >
+        Add to cart
+      </Button>
+    )}
 
-              {isAuthenticated && (
-                <Button size="large" icon={<HeartOutlined />} />
-              )}
-            </Space>
-          </div>
+    <Button
+      size="large"
+      icon={has(product._id) ? <HeartFilled /> : <HeartOutlined />}
+      onClick={handleWishlist}
+      style={{
+        color: has(product._id) ? "#c9a45c" : undefined,
+        borderColor: has(product._id) ? "#c9a45c" : undefined,
+      }}
+    />
+  </Space>
+</div>
 
           <div style={{ marginTop: 40 }}>
             <Typography.Title level={4}>Specifications</Typography.Title>

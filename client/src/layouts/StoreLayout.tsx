@@ -28,6 +28,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
+import { useWishlist } from "../context/WishlistContext";
 
 const { Header, Content, Footer } = Layout;
 
@@ -35,6 +36,7 @@ export default function StoreLayout() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const { count } = useCart();
+  const { count: wishCount } = useWishlist();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   const userMenu = {
@@ -140,19 +142,21 @@ export default function StoreLayout() {
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <Button
-            type="text"
-            icon={<HeartOutlined />}
-            onClick={() => nav("/wishlist")}
-          />
+          {/* Before */}
+<Button
+  type="text"
+  icon={<HeartOutlined />}
+  onClick={() => nav("/wishlist")}
+/>
 
-          <Badge count={count} showZero>
-            <Button
-              type="text"
-              icon={<ShoppingOutlined />}
-              onClick={() => nav("/cart")}
-            />
-          </Badge>
+{/* After — with badge */}
+<Badge count={wishCount} showZero={false} color="#c9a45c">
+  <Button
+    type="text"
+    icon={<HeartOutlined />}
+    onClick={() => nav("/wishlist")}
+  />
+</Badge>
 
           {isAuthenticated ? (
             <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>

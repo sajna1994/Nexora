@@ -143,9 +143,18 @@ useEffect(() => {
         okText="Save"
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item label="Name" name="name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+         <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+  <Input
+    onChange={(e) => {
+      const slug = e.target.value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      form.setFieldValue("slug", slug);
+    }}
+  />
+</Form.Item>
           <Form.Item label="Slug" name="slug">
             <Input />
           </Form.Item>

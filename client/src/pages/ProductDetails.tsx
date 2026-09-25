@@ -165,6 +165,45 @@ const handleWishlist = () => {
 
           <div style={{ marginTop: 40 }}>
             <Typography.Title level={4}>Specifications</Typography.Title>
+            {/* Dynamic attributes from the category */}
+{product.attributes &&
+  Object.keys(product.attributes).length > 0 && (
+    <>
+      <Typography.Title level={4} style={{ marginTop: 32 }}>
+        Product Details
+      </Typography.Title>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "8px 24px",
+        }}
+      >
+        {Object.entries(product.attributes).map(([key, value]) => {
+          const label = product.category?.fields?.find(
+            (f: any) => f.key === key
+          )?.label || key;
+
+          const display = Array.isArray(value)
+            ? value.join(", ")
+            : typeof value === "boolean"
+            ? value
+              ? "Yes"
+              : "No"
+            : String(value);
+
+          return (
+            <div key={key}>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {label}
+              </Typography.Text>
+              <div style={{ fontWeight: 500 }}>{display}</div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  )}
             <p>{specs}</p>
             <p className="muted">Stock: {product.stock}</p>
           </div>

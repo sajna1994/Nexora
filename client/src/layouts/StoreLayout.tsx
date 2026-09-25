@@ -193,24 +193,36 @@ useEffect(() => {
             </div>
             <form
               className="footer-newsletter-form"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const input = e.currentTarget.elements[0] as HTMLInputElement;
-                const email = input.value.trim();
-                if (!email) return;
+             onSubmit={async (e) => {
+  e.preventDefault();
+  const input = e.currentTarget.elements[0] as HTMLInputElement;
+  const email = input.value.trim();
+  if (!email) return;
 
-                try {
-                  await api.post("/newsletter", { email });
-                  message.success(
-                    "Subscribed! Check your inbox for a welcome gift."
-                  );
-                  input.value = "";
-                } catch (err: any) {
-                  message.error(
-                    err.response?.data?.message || "Could not subscribe"
-                  );
-                }
-              }}
+  try {
+    const res = await api.post("/newsletter", { email });
+    const code = res.data?.code;
+
+    if (code) {
+      message.success(
+        {
+          content: (
+            <span>
+              Subscribed! Your code: <b>{code}</b> — use it at checkout for
+              10% off.
+            </span>
+          ),
+          duration: 8,
+        }
+      );
+    } else {
+      message.success("Subscribed!");
+    }
+    input.value = "";
+  } catch (err: any) {
+    message.error(err.response?.data?.message || "Could not subscribe");
+  }
+}}
             >
               <input type="email" placeholder="Enter your email" required />
               <button type="submit">Subscribe</button>

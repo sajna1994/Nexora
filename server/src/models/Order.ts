@@ -14,7 +14,11 @@ const schema = new mongoose.Schema(
     ],
     shippingAddress: Object,
     paymentMethod: String,
+    subtotal: Number,        // ← ADD (optional, useful for reports)
+    discount: { type: Number, default: 0 },        // ← ADD
+    couponCode: String,
     total: Number,
+    
     status: { type: String, default: "Processing" },
   },
   { timestamps: true }

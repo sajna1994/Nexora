@@ -1,6 +1,7 @@
 import { Router } from "express";
 import Subscriber from "../models/Subscriber";
 import { requireAuth, requireAdmin } from "../../middleware/auth";
+import crypto from "crypto";
 
 const r = Router();
 
@@ -62,5 +63,41 @@ r.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
   await Subscriber.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
+/* ── Helper: generate a short, friendly code ─────────── */
+function generateCode() {
+  const suffix = crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 chars
+  return `WELCOME10-${suffix}`;
+}
 
+/* ── Public: subscribe from footer ──────────────────── */
+r.post("/", async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email" });
+    }
+
+    const existing = await Subscriber.findOne({ email });
+    if (existing) {
+      return res.json({
+        ok: true,
+        message: "You're already subscribed",
+        code: existing.welcomeCode,
+      });
+    }
+
+    const welcomeCode = generateCode();
+    const sub = await Subscriber.create({ email, welcomeCode });
+
+    res.status(201).json({
+      ok: true,
+      message: "Subscribed",
+      code: sub.welcomeCode,
+    });
+  } catch (err) {
+    console.error("[newsletter] subscribe failed:", err);
+    res.status(500).json({ message: "Subscription failed" });
+  }
+});
 export default r;

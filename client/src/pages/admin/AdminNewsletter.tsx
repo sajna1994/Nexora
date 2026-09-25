@@ -24,6 +24,9 @@ type Subscriber = {
   source?: string;
   isActive: boolean;
   createdAt: string;
+  welcomeCode?: string;      // ← ADD
+  codeUsed?: boolean;        // ← ADD
+  usedAt?: string;           // ← ADD (optional, useful later)
 };
 
 export default function AdminNewsletter() {
@@ -57,7 +60,11 @@ export default function AdminNewsletter() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return subs;
-    return subs.filter((s) => s.email.toLowerCase().includes(q));
+    return subs.filter(
+      (s) =>
+        s.email.toLowerCase().includes(q) ||
+        (s.welcomeCode || "").toLowerCase().includes(q)
+    );
   }, [subs, search]);
 
   return (
@@ -80,10 +87,10 @@ export default function AdminNewsletter() {
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            placeholder="Search email..."
+            placeholder="Search email or code..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 240 }}
+            style={{ width: 260 }}
           />
           <Button icon={<ReloadOutlined />} onClick={load}>
             Refresh
@@ -91,14 +98,7 @@ export default function AdminNewsletter() {
           <Button
             type="primary"
             icon={<DownloadOutlined />}
-            href="/api/newsletter/export"
-            target="_blank"
-            onClick={(e) => {
-              // Anchor href doesn't send Authorization header,
-              // so fetch + blob instead:
-              e.preventDefault();
-              downloadCsv();
-            }}
+            onClick={downloadCsv}
           >
             Export CSV
           </Button>
@@ -110,6 +110,7 @@ export default function AdminNewsletter() {
         loading={loading}
         dataSource={filtered}
         pagination={{ pageSize: 20, showSizeChanger: true }}
+        scroll={{ x: 1000 }}
         columns={[
           {
             title: "#",
@@ -124,20 +125,53 @@ export default function AdminNewsletter() {
           {
             title: "Source",
             dataIndex: "source",
-            width: 120,
+            width: 110,
             render: (v?: string) => <Tag color="gold">{v || "footer"}</Tag>,
+          },
+          /* ─── NEW COLUMNS ────────────────────────────── */
+          {
+            title: "Welcome Code",
+            dataIndex: "welcomeCode",
+            width: 180,
+            render: (code?: string) =>
+              code ? (
+                <code
+                  style={{
+                    fontSize: 12,
+                    background: "#f6f5f2",
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                  }}
+                >
+                  {code}
+                </code>
+              ) : (
+                "—"
+              ),
           },
           {
             title: "Status",
+            dataIndex: "codeUsed",
+            width: 100,
+            render: (used: boolean) =>
+              used ? (
+                <Tag color="red">Used</Tag>
+              ) : (
+                <Tag color="green">Unused</Tag>
+              ),
+          },
+          /* ──────────────────────────────────────────── */
+          {
+            title: "Active",
             dataIndex: "isActive",
-            width: 110,
+            width: 100,
             render: (v: boolean) =>
-              v ? <Tag color="green">Active</Tag> : <Tag>Unsubscribed</Tag>,
+              v ? <Tag color="green">Yes</Tag> : <Tag>No</Tag>,
           },
           {
             title: "Subscribed At",
             dataIndex: "createdAt",
-            width: 200,
+            width: 190,
             render: (d: string) =>
               new Date(d).toLocaleString("en-IN", {
                 dateStyle: "medium",
@@ -146,7 +180,8 @@ export default function AdminNewsletter() {
           },
           {
             title: "Actions",
-            width: 100,
+            width: 90,
+            fixed: "right" as const,
             render: (_: any, r: Subscriber) => (
               <Popconfirm
                 title="Remove this subscriber?"
@@ -167,7 +202,7 @@ export default function AdminNewsletter() {
         {search && (
           <>
             {" "}
-            · Showing <b>{filtered.length}</b> matching “{search}”
+            · Showing <b>{filtered.length}</b> matching "{search}"
           </>
         )}
       </Typography.Paragraph>

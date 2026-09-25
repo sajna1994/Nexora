@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useAuth } from "./AuthContext";
+import api from "../lib/api";
 
 export type CartItem = {
   product: any;
@@ -18,15 +20,72 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function cartKey(userId?: string | null) {
+  return `nexora_cart_${userId || "guest"}`;
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated } = useAuth();
+
   const [items, setItems] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem("nexora_cart");
+    const saved = localStorage.getItem(cartKey(user?.id));
     return saved ? JSON.parse(saved) : [];
   });
 
+  const hydrated = useRef(false);
+
+  /* Load: from server if logged in, else from localStorage */
   useEffect(() => {
-    localStorage.setItem("nexora_cart", JSON.stringify(items));
-  }, [items]);
+    hydrated.current = false;
+
+    if (isAuthenticated && user) {
+      api
+        .get("/user/cart")
+        .then((res) => {
+          const serverCart: CartItem[] = res.data.map((i: any) => ({
+            product: i.product,
+            quantity: i.quantity,
+            variant: i.variant,
+          }));
+          setItems(serverCart);
+        })
+        .catch(() => {
+          // fall back to local
+          const saved = localStorage.getItem(cartKey(user.id));
+          setItems(saved ? JSON.parse(saved) : []);
+        })
+        .finally(() => {
+          hydrated.current = true;
+        });
+    } else {
+      const saved = localStorage.getItem(cartKey("guest"));
+      setItems(saved ? JSON.parse(saved) : []);
+      hydrated.current = true;
+    }
+  }, [user?.id, isAuthenticated]);
+
+  /* Save locally always */
+  useEffect(() => {
+    if (!hydrated.current) return;
+    localStorage.setItem(cartKey(user?.id), JSON.stringify(items));
+  }, [items, user?.id]);
+
+  /* Push to server when logged in (debounced) */
+  useEffect(() => {
+    if (!hydrated.current || !isAuthenticated) return;
+
+    const t = setTimeout(() => {
+      api.put("/user/cart", {
+        cart: items.map((i) => ({
+          product: i.product._id,
+          quantity: i.quantity,
+          variant: i.variant,
+        })),
+      }).catch(() => {});
+    }, 800);
+
+    return () => clearTimeout(t);
+  }, [items, isAuthenticated]);
 
   const addToCart = (product: any, quantity = 1, variant?: any) => {
     setItems((prev) => {

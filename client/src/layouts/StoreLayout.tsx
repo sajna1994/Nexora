@@ -24,6 +24,7 @@ import {
   TwitterOutlined,
   FacebookOutlined,
   YoutubeOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
@@ -40,7 +41,11 @@ export default function StoreLayout() {
   const { count: wishCount } = useWishlist();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
 const [footerCategories, setFooterCategories] = useState<any[]>([]);
+const [welcomeCodeStored, setWelcomeCodeStored] = useState<string | null>(null);
 
+useEffect(() => {
+  setWelcomeCodeStored(localStorage.getItem("nexora_welcome_code"));
+}, [isAuthenticated]);
 useEffect(() => {
   api.get("/categories").then((res) => setFooterCategories(res.data));
 }, []);
@@ -144,16 +149,20 @@ useEffect(() => {
             }
           />
         </div>
+{/* Actions */}
+<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+  {welcomeCodeStored && isAuthenticated && (
+    <Button
+      type="text"
+      icon={<GiftOutlined style={{ color: "#c9a45c" }} />}
+      onClick={() => nav("/profile")}
+      title={`Welcome code: ${welcomeCodeStored}`}
+    />
+  )}
 
-        {/* Actions */}
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <Badge count={wishCount} showZero={false} color="#c9a45c">
-  <Button
-    type="text"
-    icon={<HeartOutlined />}
-    onClick={() => nav("/wishlist")}
-  />
-</Badge>
+  <Badge count={wishCount} showZero={false} color="#c9a45c">
+    <Button type="text" icon={<HeartOutlined />} onClick={() => nav("/wishlist")} />
+  </Badge>
 
           <Badge count={count} showZero>
             <Button
@@ -204,6 +213,11 @@ useEffect(() => {
     const code = res.data?.code;
 
     if (code) {
+      // Save it so the user can find it later
+      localStorage.setItem("nexora_welcome_code", code);
+      // Also remember which email it belongs to
+      localStorage.setItem("nexora_welcome_email", email);
+setWelcomeCodeStored(code); 
       message.success(
         {
           content: (
@@ -286,22 +300,20 @@ useEffect(() => {
     <li>
       <a onClick={() => nav("/shop")}>All Products</a>
     </li>
-                <li>
-                  <a onClick={() => nav("/shop?category=gym")}>
-                    Gym & Supplements
-                  </a>
-                </li>
-                <li>
-                  <a onClick={() => nav("/shop?category=fashion")}>Fashion</a>
-                </li>
-                <li>
-                  <a onClick={() => nav("/shop?category=cosmetics")}>
-                    Cosmetics
-                  </a>
-                </li>
-                <li>
-                  <a onClick={() => nav("/shop")}>All Products</a>
-                </li>
+<li>
+  <a onClick={() => nav("/shop?category=gym")}>      {/* ← dead link, needs _id */}
+    Gym & Supplements
+  </a>
+</li>
+<li>
+  <a onClick={() => nav("/shop?category=fashion")}>Fashion</a>  {/* ← dead */}
+</li>
+<li>
+  <a onClick={() => nav("/shop?category=cosmetics")}>Cosmetics</a>  {/* ← dead */}
+</li>
+<li>
+  <a onClick={() => nav("/shop")}>All Products</a>   {/* ← #2, duplicate */}
+</li>
               </ul>
             </div>
 

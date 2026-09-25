@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -11,9 +12,13 @@ import {
   Typography,
   message,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CloseCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import {
+  CloseCircleOutlined,
+  CheckCircleOutlined,
+  GiftOutlined,
+} from "@ant-design/icons";
 import api from "../lib/api";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -22,9 +27,10 @@ export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
   const nav = useNavigate();
-  const [loading, setLoading] = useState(false);
 
-  // Coupon state
+  const [loading, setLoading] = useState(false);
+  const [storedCode, setStoredCode] = useState<string | null>(null);
+
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
@@ -36,16 +42,29 @@ export default function Checkout() {
   const discount = appliedCoupon?.discount || 0;
   const grandTotal = Math.max(0, subtotal - discount);
 
-  const applyCoupon = async () => {
-    const code = couponInput.trim().toUpperCase();
-    if (!code) return;
+  /* Load any saved welcome code on mount */
+  useEffect(() => {
+    const c = localStorage.getItem("nexora_welcome_code");
+    if (c) setStoredCode(c);
+  }, []);
+
+  /* Auto-fill the input when a stored code exists and none is applied */
+  useEffect(() => {
+    if (storedCode && !appliedCoupon && !couponInput) {
+      setCouponInput(storedCode);
+    }
+  }, [storedCode, appliedCoupon, couponInput]);
+
+  const applyCoupon = async (codeOverride?: string) => {
+    const code = (codeOverride ?? couponInput).trim().toUpperCase();
+    if (!code) {
+      message.warning("Please enter a coupon code");
+      return;
+    }
 
     setValidating(true);
     try {
-      const res = await api.post("/coupons/validate", {
-        code,
-        subtotal,
-      });
+      const res = await api.post("/coupons/validate", { code, subtotal });
       setAppliedCoupon({ code, discount: res.data.discount });
       message.success(res.data.message || "Coupon applied");
       setCouponInput("");
@@ -82,6 +101,10 @@ export default function Checkout() {
         couponCode: appliedCoupon?.code,
       });
       message.success("Order placed successfully!");
+
+      localStorage.removeItem("nexora_welcome_code");
+      localStorage.removeItem("nexora_welcome_email");
+
       clearCart();
       nav("/orders");
     } catch (err: any) {
@@ -149,22 +172,50 @@ export default function Checkout() {
 
             <Divider style={{ margin: "16px 0" }} />
 
-            {/* Coupon section */}
+            {storedCode && !appliedCoupon && (
+              <Alert
+                type="info"
+                showIcon
+                icon={<GiftOutlined />}
+                style={{
+                  marginBottom: 12,
+                  background: "#fff8e6",
+                  border: "1px solid #f3dfa2",
+                }}
+                message={
+                  <span>
+                    You have a <b>welcome code</b>:{" "}
+                    <code
+                      style={{
+                        background: "#fff",
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                      }}
+                    >
+                      {storedCode}
+                    </code>{" "}
+                    —{" "}
+                    <a onClick={() => applyCoupon(storedCode ?? undefined)}>
+                      apply it now
+                    </a>
+                  </span>
+                }
+              />
+            )}
+
             {!appliedCoupon ? (
               <div style={{ marginBottom: 16 }}>
-                <Typography.Text type="secondary">
-                  Have a coupon?
-                </Typography.Text>
+                <Typography.Text type="secondary">Have a coupon?</Typography.Text>
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                   <Input
                     placeholder="Enter code (e.g. WELCOME10-XXXXXX)"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
-                    onPressEnter={applyCoupon}
+                    onPressEnter={() => applyCoupon()}
                     disabled={validating}
                   />
                   <Button
-                    onClick={applyCoupon}
+                    onClick={() => applyCoupon()}
                     loading={validating}
                     type="default"
                   >
@@ -192,7 +243,9 @@ export default function Checkout() {
                     {appliedCoupon.code}
                   </Tag>
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    10% off applied
+                    {subtotal > 0
+                      ? `${Math.round((discount / subtotal) * 100)}% off applied`
+                      : "Discount applied"}
                   </Typography.Text>
                 </span>
                 <Button

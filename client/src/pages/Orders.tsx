@@ -7,7 +7,11 @@ export default function Orders() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+const [welcomeCode, setWelcomeCode] = useState<string | null>(null);
 
+useEffect(() => {
+  setWelcomeCode(localStorage.getItem("nexora_welcome_code"));
+}, []);
   useEffect(() => {
     api
       .get("/orders")
@@ -23,6 +27,19 @@ export default function Orders() {
   return (
     <div className="page">
       <Typography.Title>My Orders</Typography.Title>
+  {!loading && orders.length === 0 && welcomeCode && (
+  <Card
+    style={{
+      marginBottom: 20,
+      background: "#fff8e6",
+      border: "1px solid #f3dfa2",
+    }}
+    bordered={false}
+  >
+    🎁 Welcome to NEXORA! Use code <b>{welcomeCode}</b> at checkout for 10% off
+    your first order.
+  </Card>
+)}
       <Card bordered={false}>
         <Table
           loading={loading}

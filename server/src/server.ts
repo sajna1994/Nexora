@@ -11,6 +11,7 @@ import customerRoutes from "./routes/customerRoutes";
 import newsletterRoutes from "./routes/newsletterRoutes";
 import uploadRoutes from "./routes/uploadRoutes";   // ← ADD
 import couponRoutes from "./routes/couponRoutes";
+import userRoutes from "./routes/userRoutes";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/upload", uploadRoutes);   // ← ADD
 app.use("/api/coupons", couponRoutes);
+app.use("/api/user", userRoutes);
 
 const port = Number(process.env.PORT || 5000);
 

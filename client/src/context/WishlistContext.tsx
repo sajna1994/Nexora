@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 export type WishlistItem = {
   _id: string;
@@ -20,15 +21,26 @@ type WishlistContextType = {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
+function wishKey(userId?: string | null) {
+  return `nexora_wishlist_${userId || "guest"}`;
+}
+
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+
   const [items, setItems] = useState<WishlistItem[]>(() => {
-    const saved = localStorage.getItem("nexora_wishlist");
+    const saved = localStorage.getItem(wishKey(user?.id));
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem("nexora_wishlist", JSON.stringify(items));
-  }, [items]);
+    const saved = localStorage.getItem(wishKey(user?.id));
+    setItems(saved ? JSON.parse(saved) : []);
+  }, [user?.id]);
+
+  useEffect(() => {
+    localStorage.setItem(wishKey(user?.id), JSON.stringify(items));
+  }, [items, user?.id]);
 
   const has = (id: string) => items.some((i) => i._id === id);
 
@@ -37,7 +49,6 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       if (prev.some((i) => i._id === product._id)) {
         return prev.filter((i) => i._id !== product._id);
       }
-      // Keep only the fields we need
       return [
         ...prev,
         {

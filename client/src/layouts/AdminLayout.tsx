@@ -1,6 +1,7 @@
 import { Layout, Menu, Typography, Button } from "antd";
 import {
   DashboardOutlined,
+  BarChartOutlined, 
   ShoppingOutlined,
   AppstoreOutlined,
   ShoppingCartOutlined,
@@ -57,6 +58,8 @@ export default function AdminLayout() {
           selectedKeys={[loc.pathname]}
           items={[
             { key: "/admin", icon: <DashboardOutlined />, label: "Dashboard" },
+            { key: "/admin/analytics", icon: <BarChartOutlined />, label: "Analytics" },   // ← ADD
+
             {
               key: "/admin/products",
               icon: <ShoppingOutlined />,

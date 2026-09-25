@@ -6,19 +6,19 @@ const schema = new mongoose.Schema(
     items: [
       {
         product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-        name: String,
-        quantity: Number,
-        price: Number,
+        name: { type: String, required: true },
+        quantity: { type: Number, required: true, default: 1, min: 1 },
+        price: { type: Number, required: true, default: 0, min: 0 },
         variant: Object,
       },
     ],
     shippingAddress: Object,
     paymentMethod: String,
-    subtotal: Number,        // ← ADD (optional, useful for reports)
-    discount: { type: Number, default: 0 },        // ← ADD
+    subtotal: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
     couponCode: String,
-    total: Number,
-    
+    total: { type: Number, required: true, default: 0 },
+
     status: { type: String, default: "Processing" },
   },
   { timestamps: true }

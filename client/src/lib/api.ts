@@ -1,7 +1,9 @@
+// client/src/lib/api.ts
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
+  // Use the environment variable if it exists, otherwise fall back to the local proxy
+  baseURL: import.meta.env.VITE_API_URL || "/api",
 });
 
 api.interceptors.request.use((config) => {

@@ -18,7 +18,13 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+app.use(cors({ 
+  origin: [
+    "http://localhost:5173", 
+    process.env.CLIENT_URL // This will be set in Render
+  ].filter(Boolean) as string[],
+  credentials: true
+}));
 app.use(express.json());
 // Serve uploaded files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));  // ← ADD

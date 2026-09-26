@@ -21,6 +21,7 @@ export default function AdminCustomers() {
         rowKey="_id"
         loading={loading}
         dataSource={data}
+        scroll={{ x: "max-content" }}
         columns={[
           { title: "Name", dataIndex: "name" },
           { title: "Email", dataIndex: "email" },

@@ -12,13 +12,15 @@ export default function Shop() {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "all");
   const [sort, setSort] = useState("featured");
-useEffect(() => {
-  const sp = searchParams.get("category") || "all";
-  if (sp !== category) setCategory(sp);
 
-  const sq = searchParams.get("search") || "";
-  if (sq !== search) setSearch(sq);
-}, [searchParams]);
+  useEffect(() => {
+    const sp = searchParams.get("category") || "all";
+    if (sp !== category) setCategory(sp);
+
+    const sq = searchParams.get("search") || "";
+    if (sq !== search) setSearch(sq);
+  }, [searchParams]);
+
   useEffect(() => {
     api.get("/categories").then((res) =>
       setCategories([
@@ -64,20 +66,23 @@ useEffect(() => {
   }, [search, category, sort]);
 
   return (
-    <div className="page">
-      <Typography.Title>Shop</Typography.Title>
-      <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
+    <div className="page shop-page">
+      <Typography.Title level={2} style={{ marginTop: 0 }}>
+        Shop
+      </Typography.Title>
+
+      {/* Mobile-friendly filter bar */}
+      <div className="shop-filters">
         <Input
           placeholder="Search products"
-          style={{ maxWidth: 400 }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          allowClear
         />
         <Select
           value={category}
           onChange={setCategory}
           options={categories}
-          style={{ width: 220 }}
         />
         <Select
           value={sort}
@@ -87,22 +92,21 @@ useEffect(() => {
             { value: "low", label: "Price: Low to High" },
             { value: "high", label: "Price: High to Low" },
           ]}
-          style={{ width: 220 }}
         />
       </div>
 
       {loading ? (
-        <Spin size="large" />
+        <div style={{ textAlign: "center", padding: 48 }}>
+          <Spin size="large" />
+        </div>
       ) : products.length === 0 ? (
         <Empty description="No products found" />
       ) : (
-        <Row gutter={[20, 20]}>
+        <div className="product-grid">
           {products.map((p) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={p._id}>
-              <ProductCard p={p} />
-            </Col>
+            <ProductCard key={p._id} p={p} />
           ))}
-        </Row>
+        </div>
       )}
     </div>
   );

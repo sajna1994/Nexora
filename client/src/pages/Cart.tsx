@@ -19,36 +19,50 @@ export default function Cart() {
       <Typography.Title>Your Cart</Typography.Title>
       <Row gutter={[32, 32]}>
         <Col xs={24} lg={16}>
-          {items.map((item) => (
-            <Card bordered={false} key={item.product._id} style={{ marginBottom: 16 }}>
-              <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-                <img
-                  src={item.product.images?.[0] || "https://via.placeholder.com/300"}
-                  width={100}
-                  style={{ borderRadius: 12, objectFit: "cover", height: 100 }}
-                />
-                <div style={{ flex: 1 }}>
-                  <b>{item.product.name}</b>
-                  {item.variant && (
-                    <p className="muted">
-                      {Object.entries(item.variant)
-                        .map(([k, v]) => `${k}: ${v}`)
-                        .join(" · ")}
-                    </p>
-                  )}
-                </div>
-                <InputNumber
-                  min={1}
-                  value={item.quantity}
-                  onChange={(v) => updateQuantity(item.product._id, v || 1)}
-                />
-                <b>₹{(item.product.discountPrice ?? item.product.price) * item.quantity}</b>
-                <Button danger type="text" onClick={() => removeFromCart(item.product._id)}>
-                  Remove
-                </Button>
-              </div>
-            </Card>
-          ))}
+       {items.map((item) => (
+  <Card
+    bordered={false}
+    key={item.product._id}
+    className="cart-item-card"
+    style={{ marginBottom: 12 }}
+  >
+    <div className="cart-item-row">
+      <img
+        className="cart-item-image"
+        src={item.product.images?.[0] || "https://via.placeholder.com/300"}
+        alt={item.product.name}
+      />
+      <div className="cart-item-info">
+        <b className="cart-item-name">{item.product.name}</b>
+        {item.variant && (
+          <p className="muted cart-item-variant">
+            {Object.entries(item.variant)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(" · ")}
+          </p>
+        )}
+        <div className="cart-item-price-row">
+          <b>₹{(item.product.discountPrice ?? item.product.price) * item.quantity}</b>
+          <InputNumber
+            size="small"
+            min={1}
+            value={item.quantity}
+            onChange={(v) => updateQuantity(item.product._id, v || 1)}
+          />
+        </div>
+        <Button
+          danger
+          type="text"
+          size="small"
+          className="cart-item-remove"
+          onClick={() => removeFromCart(item.product._id)}
+        >
+          Remove
+        </Button>
+      </div>
+    </div>
+  </Card>
+))}
         </Col>
         <Col xs={24} lg={8}>
           <Card bordered={false}>

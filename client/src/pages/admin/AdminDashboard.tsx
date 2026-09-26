@@ -88,6 +88,7 @@ export default function AdminDashboard() {
           pagination={false}
           rowKey="_id"
           dataSource={recent}
+          scroll={{ x: "max-content" }}
           columns={[
             {
               title: "Order",

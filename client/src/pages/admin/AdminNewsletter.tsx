@@ -79,30 +79,32 @@ export default function AdminNewsletter() {
           gap: 12,
         }}
       >
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          Newsletter Subscribers
-        </Typography.Title>
+       <div className="admin-page-header">
+  <Typography.Title level={4} style={{ margin: 0 }}>
+    Newsletter Subscribers
+  </Typography.Title>
 
-        <Space wrap>
-          <Input
-            allowClear
-            prefix={<SearchOutlined />}
-            placeholder="Search email or code..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 260 }}
-          />
-          <Button icon={<ReloadOutlined />} onClick={load}>
-            Refresh
-          </Button>
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={downloadCsv}
-          >
-            Export CSV
-          </Button>
-        </Space>
+  <Space wrap>
+    <Input
+      allowClear
+      prefix={<SearchOutlined />}
+      placeholder="Search email or code..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      style={{ width: 220 }}
+    />
+    <Button icon={<ReloadOutlined />} onClick={load}>
+      Refresh
+    </Button>
+    <Button
+      type="primary"
+      icon={<DownloadOutlined />}
+      onClick={downloadCsv}
+    >
+      Export CSV
+    </Button>
+  </Space>
+</div>
       </div>
 
       <Table

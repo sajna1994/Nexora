@@ -25,6 +25,7 @@ export default function AdminOrders() {
       <Table
         rowKey="_id"
         dataSource={orders}
+        scroll={{ x: "max-content" }}
         columns={[
           {
             title: "Order",

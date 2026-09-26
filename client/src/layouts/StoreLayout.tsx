@@ -309,22 +309,8 @@ setWelcomeCodeStored(code);
     <li>
       <a onClick={() => nav("/shop")}>All Products</a>
     </li>
-<li>
-  <a onClick={() => nav("/shop?category=gym")}>      {/* ← dead link, needs _id */}
-    Gym & Supplements
-  </a>
-</li>
-<li>
-  <a onClick={() => nav("/shop?category=fashion")}>Fashion</a>  {/* ← dead */}
-</li>
-<li>
-  <a onClick={() => nav("/shop?category=cosmetics")}>Cosmetics</a>  {/* ← dead */}
-</li>
-<li>
-  <a onClick={() => nav("/shop")}>All Products</a>   {/* ← #2, duplicate */}
-</li>
-              </ul>
-            </div>
+  </ul>
+</div>
 
            {/* Help */}
 <div className="footer-col">

@@ -92,30 +92,27 @@ export default function AdminCategories() {
 
   return (
     <Card className="admin-card">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <Typography.Title level={4}>Categories</Typography.Title>
-        <Button
-          type="primary"
-          onClick={() => {
-            setEditing(null);
-            form.resetFields();
-            setFileList([]);
-            setOpen(true);
-          }}
-        >
-          Add category
-        </Button>
-      </div>
+     <div className="admin-page-header">
+  <Typography.Title level={4} style={{ margin: 0 }}>
+    Categories
+  </Typography.Title>
+  <Button
+    type="primary"
+    onClick={() => {
+      setEditing(null);
+      form.resetFields();
+      setFileList([]);
+      setOpen(true);
+    }}
+  >
+    Add category
+  </Button>
+</div>
 
       <Table
         rowKey="_id"
         dataSource={categories}
+        scroll={{ x: "max-content" }}
         columns={[
           {
             title: "Image",

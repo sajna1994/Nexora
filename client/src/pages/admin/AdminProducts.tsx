@@ -45,18 +45,20 @@ export default function AdminProducts() {
       api.get("/categories").then((res) => setCategories(res.data));
     }
   }, [open]);
-async function compressImage(file: File): Promise<File> {
-  // Skip tiny files — no need to waste CPU
-  if (file.size < 1_000_000) return file;
-  return imageCompression(file, {
-    maxSizeMB: 0.8,
-    maxWidthOrHeight: 1600,
-    useWebWorker: true,
-  });
-}
+
+  async function compressImage(file: File): Promise<File> {
+    // Skip tiny files — no need to waste CPU
+    if (file.size < 1_000_000) return file;
+    return imageCompression(file, {
+      maxSizeMB: 0.8,
+      maxWidthOrHeight: 1600,
+      useWebWorker: true,
+    });
+  }
+
   const onFinish = async (values: any) => {
     try {
-      const imageUrl = fileList[0]?.url || fileList[0]?.response?.url;
+      const imageUrl = fileList[0]?.url || (fileList[0]?.response as any)?.url;
       const payload = {
         ...values,
         images: imageUrl ? [imageUrl] : [],
@@ -89,14 +91,11 @@ async function compressImage(file: File): Promise<File> {
 
   return (
     <Card className="admin-card">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <Typography.Title level={4}>Products</Typography.Title>
+      {/* ── Page header ─────────────────────────────── */}
+      <div className="admin-page-header">
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          Products
+        </Typography.Title>
         <Button
           type="primary"
           onClick={() => {
@@ -110,9 +109,11 @@ async function compressImage(file: File): Promise<File> {
         </Button>
       </div>
 
+      {/* ── Products table ──────────────────────────── */}
       <Table
         rowKey="_id"
         dataSource={products}
+        scroll={{ x: "max-content" }}
         columns={[
           {
             title: "Image",
@@ -196,6 +197,7 @@ async function compressImage(file: File): Promise<File> {
         ]}
       />
 
+      {/* ── Add / Edit modal ────────────────────────── */}
       <Modal
         title={editing ? "Edit Product" : "Add Product"}
         open={open}
@@ -234,7 +236,7 @@ async function compressImage(file: File): Promise<File> {
           </Form.Item>
 
           {/* Dynamic, category-driven fields */}
-          {fields.length > 0 && (
+          {fields.length > 0 && selectedCategory && (
             <>
               <Typography.Title level={5} style={{ marginTop: 16 }}>
                 {selectedCategory.name} Details
@@ -246,82 +248,86 @@ async function compressImage(file: File): Promise<File> {
           <Form.Item label="Brand" name="brand">
             <Input />
           </Form.Item>
+
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={3} />
           </Form.Item>
+
           <Form.Item label="Price" name="price" rules={[{ required: true }]}>
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
+
           <Form.Item label="Discount Price" name="discountPrice">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
+
           <Form.Item label="Stock" name="stock">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
 
           <Form.Item label="Product Image">
-  <Upload
-    name="file"
-    listType="picture-card"
-    fileList={fileList}
-    customRequest={async ({ file, onSuccess, onError }) => {
-      try {
-        const original = file as File;
+            <Upload
+              name="file"
+              listType="picture-card"
+              fileList={fileList}
+              customRequest={async ({ file, onSuccess, onError }) => {
+                try {
+                  const original = file as File;
 
-        // 1. Client-side validation
-        if (!original.type.startsWith("image/")) {
-          message.error("Only image files are allowed");
-          onError?.(new Error("Not an image"));
-          return;
-        }
+                  // 1. Client-side validation
+                  if (!original.type.startsWith("image/")) {
+                    message.error("Only image files are allowed");
+                    onError?.(new Error("Not an image"));
+                    return;
+                  }
 
-        // 2. Compress before upload
-        const compressed = await compressImage(original);
+                  // 2. Compress before upload
+                  const compressed = await compressImage(original);
 
-        // 3. Upload the compressed file
-        const formData = new FormData();
-        formData.append("file", compressed, original.name);
+                  // 3. Upload the compressed file
+                  const formData = new FormData();
+                  formData.append("file", compressed, original.name);
 
-        const res = await api.post("/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+                  const res = await api.post("/upload", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                  });
 
-        // 4. Antd needs the response on the file object
-        onSuccess?.(res.data, compressed as any);
-      } catch (err: any) {
-        const msg =
-          err.response?.data?.message ||
-          err.message ||
-          "Upload failed. Please try again.";
-        message.error(msg);
-        onError?.(err);
-      }
-    }}
-    accept="image/*"
-    maxCount={1}
-    onChange={({ file, fileList: newList }) => {
-      setFileList(newList);
-      // Remove failed files from the list automatically
-      if (file.status === "error") {
-        setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
-      }
-    }}
-    onRemove={() => setFileList([])}
-  >
-    {fileList.length >= 1 ? null : (
-      <div>
-        <UploadOutlined />
-        <div style={{ marginTop: 8 }}>Upload</div>
-      </div>
-    )}
-  </Upload>
-  <Typography.Text
-    type="secondary"
-    style={{ fontSize: 12, display: "block", marginTop: 4 }}
-  >
-    JPG, PNG, WebP · Auto-compressed to &lt; 800 KB
-  </Typography.Text>
-</Form.Item>
+                  // 4. Antd needs the response on the file object
+                  onSuccess?.(res.data, compressed as any);
+                } catch (err: any) {
+                  const msg =
+                    err.response?.data?.message ||
+                    err.message ||
+                    "Upload failed. Please try again.";
+                  message.error(msg);
+                  onError?.(err);
+                }
+              }}
+              accept="image/*"
+              maxCount={1}
+              onChange={({ file, fileList: newList }) => {
+                setFileList(newList);
+                // Remove failed files from the list automatically
+                if (file.status === "error") {
+                  setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+                }
+              }}
+              onRemove={() => setFileList([])}
+            >
+              {fileList.length >= 1 ? null : (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+            <Typography.Text
+              type="secondary"
+              style={{ fontSize: 12, display: "block", marginTop: 4 }}
+            >
+              JPG, PNG, WebP · Auto-compressed to &lt; 800 KB
+            </Typography.Text>
+          </Form.Item>
         </Form>
       </Modal>
     </Card>

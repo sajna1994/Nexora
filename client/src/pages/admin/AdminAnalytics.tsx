@@ -212,35 +212,37 @@ export default function AdminAnalytics() {
   return (
     <>
       {/* ── Range selector ─────────────────────────── */}
-      <Card
-        className="admin-card"
-        style={{ marginBottom: 16 }}
-        styles={{ body: { padding: "12px 16px" } }}
-      >
-        <Row justify="space-between" align="middle" gutter={[12, 12]}>
-          <Col>
-            <Segmented
-              value={period}
-              onChange={(v) => setPeriod(v as Period)}
-              options={[
-                { label: "Last 7 days", value: "7d" },
-                { label: "Last 30 days", value: "30d" },
-                { label: "This month", value: "month" },
-                { label: "This year", value: "year" },
-                { label: "Custom", value: "custom" },
-              ]}
-            />
-          </Col>
-          {period === "custom" && (
-            <Col>
-              <RangePicker
-                value={custom as any}
-                onChange={(v) => setCustom(v as any)}
-              />
-            </Col>
-          )}
-        </Row>
-      </Card>
+     <Card
+  className="admin-card"
+  style={{ marginBottom: 16 }}
+  styles={{ body: { padding: "12px 16px" } }}
+>
+  <Row justify="space-between" align="middle" gutter={[12, 12]}>
+    <Col xs={24} md="auto">
+      <div style={{ overflowX: "auto" }}>
+        <Segmented
+          value={period}
+          onChange={(v) => setPeriod(v as Period)}
+          options={[
+            { label: "7d", value: "7d" },
+            { label: "30d", value: "30d" },
+            { label: "Month", value: "month" },
+            { label: "Year", value: "year" },
+            { label: "Custom", value: "custom" },
+          ]}
+        />
+      </div>
+    </Col>
+    {period === "custom" && (
+      <Col xs={24} md="auto">
+        <RangePicker
+          value={custom as any}
+          onChange={(v) => setCustom(v as any)}
+        />
+      </Col>
+    )}
+  </Row>
+</Card>
 
       {/* ── KPI cards ──────────────────────────────── */}
       <Row gutter={[16, 16]}>

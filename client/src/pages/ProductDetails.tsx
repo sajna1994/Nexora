@@ -9,7 +9,11 @@ import {
   Spin,
   message,
 } from "antd";
-import { HeartOutlined, HeartFilled, ShoppingOutlined } from "@ant-design/icons";
+import {
+  HeartOutlined,
+  HeartFilled,
+  ShoppingOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../lib/api";
@@ -27,20 +31,21 @@ export default function ProductDetails() {
 
   const { addToCart } = useCart();
   const { isAdmin, isAuthenticated } = useAuth();
-const { has, toggle } = useWishlist();
+  const { has, toggle } = useWishlist();
 
-const handleWishlist = () => {
-     if (!isAuthenticated) {
-    message.info("Sign in to save to wishlist");
-    nav("/login");
-    return;
-  }
-  if (!product) return;
-  toggle(product);
-  message.success(
-    has(product._id) ? "Removed from wishlist" : "Added to wishlist"
-  );
-};
+  const handleWishlist = () => {
+    if (!isAuthenticated) {
+      message.info("Sign in to save to wishlist");
+      nav("/login");
+      return;
+    }
+    if (!product) return;
+    toggle(product);
+    message.success(
+      has(product._id) ? "Removed from wishlist" : "Added to wishlist"
+    );
+  };
+
   useEffect(() => {
     if (!id) return;
     api
@@ -76,154 +81,183 @@ const handleWishlist = () => {
     : "—";
 
   return (
-    <div className="page">
-      <Row gutter={[48, 48]}>
-        <Col xs={24} md={12}>
-          <img
-            src={product.images?.[0] || "https://via.placeholder.com/600"}
-            alt={product.name}
-            style={{ width: "100%", borderRadius: 24 }}
-          />
-        </Col>
+    <>
+      <div className="page product-details-page">
+        <Row gutter={[24, 24]}>
+          {/* ── Product image ─────────────────────────── */}
+          <Col xs={24} md={12}>
+            <img
+              src={product.images?.[0] || "https://via.placeholder.com/600"}
+              alt={product.name}
+              style={{ width: "100%", borderRadius: 16 }}
+            />
+          </Col>
 
-        <Col xs={24} md={12}>
-          <Tag>{product.category?.name || "Product"}</Tag>
-          <Typography.Title>{product.name}</Typography.Title>
+          {/* ── Product info ──────────────────────────── */}
+          <Col xs={24} md={12}>
+            <Tag>{product.category?.name || "Product"}</Tag>
+            <Typography.Title level={3} style={{ marginTop: 8 }}>
+              {product.name}
+            </Typography.Title>
 
-          <Typography.Title level={2}>
-            ₹{product.discountPrice ?? product.price}
-            {product.discountPrice && (
-              <span
-                className="muted"
-                style={{
-                  textDecoration: "line-through",
-                  fontSize: 18,
-                  marginLeft: 12,
-                }}
-              >
-                ₹{product.price}
-              </span>
-            )}
-          </Typography.Title>
+            <Typography.Title level={2} style={{ margin: "8px 0" }}>
+              ₹{product.discountPrice ?? product.price}
+              {product.discountPrice && (
+                <span
+                  className="muted"
+                  style={{
+                    textDecoration: "line-through",
+                    fontSize: 16,
+                    marginLeft: 10,
+                  }}
+                >
+                  ₹{product.price}
+                </span>
+              )}
+            </Typography.Title>
 
-          <Typography.Paragraph className="muted">
-            {product.description || "No description available."}
-          </Typography.Paragraph>
+            <Typography.Paragraph className="muted">
+              {product.description || "No description available."}
+            </Typography.Paragraph>
 
-          {product.variants?.map((v: any) => (
-            <div key={v.name}>
-              <Typography.Title level={5}>{v.name}</Typography.Title>
-              <Space wrap>
-                {v.options.map((opt: string) => (
+            {/* ── Variants (legacy + new) ───────────────── */}
+            {product.variants?.map((v: any) => (
+              <div key={v.name}>
+                <Typography.Title level={5}>{v.name}</Typography.Title>
+                <Space wrap>
+                  {v.options.map((opt: string) => (
+                    <Button
+                      key={opt}
+                      type={
+                        selectedVariant[v.name] === opt ? "primary" : "default"
+                      }
+                      onClick={() =>
+                        setSelectedVariant({
+                          ...selectedVariant,
+                          [v.name]: opt,
+                        })
+                      }
+                    >
+                      {opt}
+                    </Button>
+                  ))}
+                </Space>
+              </div>
+            ))}
+
+            <Typography.Title level={5} style={{ marginTop: 20 }}>
+              Quantity
+            </Typography.Title>
+            <InputNumber
+              min={1}
+              value={quantity}
+              onChange={(v) => setQuantity(v || 1)}
+            />
+
+            {/* ── Desktop-only actions ──────────────────── */}
+            <div className="desktop-only" style={{ marginTop: 24 }}>
+              <Space>
+                {!isAdmin && (
                   <Button
-                    key={opt}
-                    type={
-                      selectedVariant[v.name] === opt ? "primary" : "default"
-                    }
-                    onClick={() =>
-                      setSelectedVariant({ ...selectedVariant, [v.name]: opt })
-                    }
+                    type="primary"
+                    size="large"
+                    icon={<ShoppingOutlined />}
+                    onClick={handleAdd}
                   >
-                    {opt}
+                    Add to cart
                   </Button>
-                ))}
+                )}
+                <Button
+                  size="large"
+                  icon={
+                    has(product._id) ? <HeartFilled /> : <HeartOutlined />
+                  }
+                  onClick={handleWishlist}
+                />
               </Space>
             </div>
-          ))}
 
-          <Typography.Title level={5}>Quantity</Typography.Title>
-          <InputNumber
-            min={1}
-            value={quantity}
-            onChange={(v) => setQuantity(v || 1)}
-          />
+            {/* ── Specifications ────────────────────────── */}
+            <div style={{ marginTop: 40 }}>
+              <Typography.Title level={4}>Specifications</Typography.Title>
 
-         <div style={{ marginTop: 28 }}>
-  <Space>
-    {!isAdmin && (
-      <Button
-        type="primary"
-        size="large"
-        icon={<ShoppingOutlined />}
-        onClick={handleAdd}
-      >
-        Add to cart
-      </Button>
-    )}
+              {/* Dynamic attributes from the category */}
+              {product.attributes &&
+                Object.keys(product.attributes).length > 0 && (
+                  <>
+                    <Typography.Title level={5} style={{ marginTop: 16 }}>
+                      Product Details
+                    </Typography.Title>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "8px 24px",
+                      }}
+                    >
+                      {Object.entries(product.attributes).map(
+                        ([key, value]) => {
+                          const label =
+                            product.category?.fields?.find(
+                              (f: any) => f.key === key
+                            )?.label || key;
 
-   {/* Mobile sticky Add-to-cart bar */}
-<div className="mobile-sticky-cta">
-  <Button
-    shape="circle"
-    size="large"
-    icon={has(product._id) ? <HeartFilled /> : <HeartOutlined />}
-    onClick={handleWishlist}
-    style={{
-      color: has(product._id) ? "#c9a45c" : undefined,
-      borderColor: has(product._id) ? "#c9a45c" : undefined,
-    }}
-  />
-  {!isAdmin && (
-    <Button
-      type="primary"
-      size="large"
-      icon={<ShoppingOutlined />}
-      onClick={handleAdd}
-      style={{ flex: 1 }}
-    >
-      Add to cart · ₹{product.discountPrice ?? product.price}
-    </Button>
-  )}
-</div>
-  </Space>
-</div>
+                          const display = Array.isArray(value)
+                            ? value.join(", ")
+                            : typeof value === "boolean"
+                            ? value
+                              ? "Yes"
+                              : "No"
+                            : String(value);
 
-          <div style={{ marginTop: 40 }}>
-            <Typography.Title level={4}>Specifications</Typography.Title>
-            {/* Dynamic attributes from the category */}
-{product.attributes &&
-  Object.keys(product.attributes).length > 0 && (
-    <>
-      <Typography.Title level={4} style={{ marginTop: 32 }}>
-        Product Details
-      </Typography.Title>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "8px 24px",
-        }}
-      >
-        {Object.entries(product.attributes).map(([key, value]) => {
-          const label = product.category?.fields?.find(
-            (f: any) => f.key === key
-          )?.label || key;
+                          return (
+                            <div key={key}>
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: 12 }}
+                              >
+                                {label}
+                              </Typography.Text>
+                              <div style={{ fontWeight: 500 }}>{display}</div>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </>
+                )}
 
-          const display = Array.isArray(value)
-            ? value.join(", ")
-            : typeof value === "boolean"
-            ? value
-              ? "Yes"
-              : "No"
-            : String(value);
-
-          return (
-            <div key={key}>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {label}
-              </Typography.Text>
-              <div style={{ fontWeight: 500 }}>{display}</div>
+              <p style={{ marginTop: 16 }}>{specs}</p>
+              <p className="muted">Stock: {product.stock}</p>
             </div>
-          );
-        })}
+          </Col>
+        </Row>
+      </div>
+
+      {/* ── Mobile sticky CTA ─────────────────────────── */}
+      <div className="mobile-sticky-cta">
+        <Button
+          shape="circle"
+          size="large"
+          icon={has(product._id) ? <HeartFilled /> : <HeartOutlined />}
+          onClick={handleWishlist}
+          style={{
+            color: has(product._id) ? "#c9a45c" : undefined,
+            borderColor: has(product._id) ? "#c9a45c" : undefined,
+          }}
+        />
+        {!isAdmin && (
+          <Button
+            type="primary"
+            size="large"
+            icon={<ShoppingOutlined />}
+            onClick={handleAdd}
+            style={{ flex: 1 }}
+          >
+            Add to cart · ₹{product.discountPrice ?? product.price}
+          </Button>
+        )}
       </div>
     </>
-  )}
-            <p>{specs}</p>
-            <p className="muted">Stock: {product.stock}</p>
-          </div>
-        </Col>
-      </Row>
-    </div>
   );
 }

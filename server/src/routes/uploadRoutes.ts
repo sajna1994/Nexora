@@ -63,8 +63,12 @@ function handleUpload(req: any, res: any, next: any) {
 
 r.post("/", requireAuth, requireAdmin, handleUpload, (req: any, res) => {
   if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-  const url = `/uploads/${req.file.filename}`;
-  res.status(201).json({ url });
+  // Build an absolute URL that works from any origin
+const protocol = req.protocol; // "http" or "https"
+const host = req.get("host");  // "nexora-backend-6vw6.onrender.com"
+const url = `${protocol}://${host}/uploads/${req.file.filename}`;
+
+res.status(201).json({ url });
 });
 
 export default r;

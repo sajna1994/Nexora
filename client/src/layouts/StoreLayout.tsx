@@ -25,6 +25,7 @@ import {
   FacebookOutlined,
   YoutubeOutlined,
   GiftOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
@@ -104,89 +105,97 @@ useEffect(() => {
   return (
     <Layout style={{ minHeight: "100vh", background: "#faf9f7" }}>
       <Header
-        style={{
-          height: 76,
-          display: "flex",
-          alignItems: "center",
-          gap: 24,
-          background: "#fff",
-          borderBottom: "1px solid #eee",
-          padding: "0 24px",
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-        }}
-      >
-        {/* Mobile menu button */}
-        <Button
-          type="text"
-          icon={<MenuOutlined />}
-          onClick={() => setOpen(true)}
-          className="mobile-menu"
-        />
+  style={{
+    height: 64,
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    background: "#fff",
+    borderBottom: "1px solid #eee",
+    padding: "0 16px",
+    position: "sticky",
+    top: 0,
+    zIndex: 20,
+  }}
+>
+  {/* Mobile: menu button */}
+  <Button
+    type="text"
+    icon={<MenuOutlined />}
+    onClick={() => setOpen(true)}
+    className="mobile-only"
+  />
 
-        {/* Logo */}
-        <img
-          src="/logoo.png"
-          alt="NEXORA"
-          onClick={() => nav("/")}
-          style={{
-            height: 54,
-            width: "auto",
-            cursor: "pointer",
-            objectFit: "contain",
-          }}
-        />
+  {/* Logo */}
+  <img
+    src="/logoo.png"
+    alt="NEXORA"
+    onClick={() => nav("/")}
+    style={{
+      height: 40,
+      width: "auto",
+      cursor: "pointer",
+      objectFit: "contain",
+    }}
+  />
 
-        {/* Search */}
-        <div style={{ flex: 1, maxWidth: 560, margin: "0 auto" }}>
-          <Input
-            size="large"
-            prefix={<SearchOutlined />}
-            placeholder="Search products, brands and categories..."
-            onPressEnter={(e) =>
-              nav("/shop?search=" + encodeURIComponent(e.currentTarget.value))
-            }
-          />
-        </div>
-{/* Actions */}
-<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-  {welcomeCodeStored && isAuthenticated && (
+  {/* Desktop: search box in header */}
+  <div
+    className="desktop-only"
+    style={{ flex: 1, maxWidth: 560, margin: "0 auto" }}
+  >
+    <Input
+      size="large"
+      prefix={<SearchOutlined />}
+      placeholder="Search products, brands and categories..."
+      onPressEnter={(e) =>
+        nav("/shop?search=" + encodeURIComponent(e.currentTarget.value))
+      }
+    />
+  </div>
+
+  {/* Actions */}
+  <div
+    style={{
+      display: "flex",
+      gap: 6,
+      alignItems: "center",
+      marginLeft: "auto",
+    }}
+  >
+    {/* Mobile: search icon → jumps to shop */}
     <Button
       type="text"
-      icon={<GiftOutlined style={{ color: "#c9a45c" }} />}
-      onClick={() => nav("/profile")}
-      title={`Welcome code: ${welcomeCodeStored}`}
+      icon={<SearchOutlined />}
+      onClick={() => nav("/shop")}
+      className="mobile-only"
     />
-  )}
 
-  <Badge count={wishCount} showZero={false} color="#c9a45c">
-    <Button type="text" icon={<HeartOutlined />} onClick={() => nav("/wishlist")} />
-  </Badge>
+    {/* Desktop: wishlist + cart + avatar */}
+    <div className="desktop-only" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+      <Badge count={wishCount} showZero={false} color="#c9a45c">
+        <Button type="text" icon={<HeartOutlined />} onClick={() => nav("/wishlist")} />
+      </Badge>
+      <Badge count={count} showZero>
+        <Button type="text" icon={<ShoppingOutlined />} onClick={() => nav("/cart")} />
+      </Badge>
 
-          <Badge count={count} showZero>
-            <Button
-              type="text"
-              icon={<ShoppingOutlined />}
-              onClick={() => nav("/cart")}
-            />
-          </Badge>
-
-          {isAuthenticated ? (
-            <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>
-              <Space style={{ cursor: "pointer", paddingLeft: 8 }}>
-                <Avatar size="small" style={{ background: "#b8892d" }}>
-                  {user?.name?.[0]?.toUpperCase()}
-                </Avatar>
-              </Space>
-            </Dropdown>
-          ) : (
-            <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>
-              <Button type="text" icon={<UserOutlined />} />
-            </Dropdown>
-          )}
-        </div>
-      </Header>
+      {isAuthenticated ? (
+        <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>
+          <Space style={{ cursor: "pointer", paddingLeft: 4 }}>
+            <Avatar size="small" style={{ background: "#b8892d" }}>
+              {user?.name?.[0]?.toUpperCase()}
+            </Avatar>
+          </Space>
+        </Dropdown>
+      ) : (
+        <Dropdown menu={userMenu} placement="bottomRight" trigger={["click"]}>
+          <Button type="text" icon={<UserOutlined />} />
+        </Dropdown>
+      )}
+    </div>
+  </div>
+</Header>
 
       <Content>
         <Outlet />
@@ -387,30 +396,94 @@ setWelcomeCodeStored(code);
 
       {/* Mobile drawer */}
       <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
-        title={
-          <img
-            src="/logoo.png"
-            alt="NEXORA"
-            style={{ height: 32, width: "auto", objectFit: "contain" }}
-          />
-        }
+  placement="left"
+  open={open}
+  onClose={() => setOpen(false)}
+  width={280}
+  title={
+    <img src="/logoo.png" alt="NEXORA" style={{ height: 32 }} />
+  }
+  styles={{
+    body: { padding: 0 },
+  }}
+>
+  {/* User section */}
+  <div
+    style={{
+      padding: 16,
+      background: "linear-gradient(135deg, #1a1a1a, #2a2520)",
+      color: "#fff",
+    }}
+  >
+    {isAuthenticated ? (
+      <>
+        <Avatar size={44} style={{ background: "#b8892d", marginBottom: 8 }}>
+          {user?.name?.[0]?.toUpperCase()}
+        </Avatar>
+        <div style={{ fontWeight: 700 }}>{user?.name}</div>
+        <div style={{ fontSize: 12, color: "#c9a45c" }}>{user?.email}</div>
+      </>
+    ) : (
+      <Button type="primary" block onClick={() => { setOpen(false); nav("/login"); }}>
+        Sign in / Register
+      </Button>
+    )}
+  </div>
+
+  {/* Categories */}
+  <div style={{ padding: "16px 20px 8px", fontSize: 11, letterSpacing: 2, color: "#999", fontWeight: 700 }}>
+    SHOP
+  </div>
+  <Menu
+    mode="inline"
+    style={{ border: "none" }}
+    items={[
+      { key: "shop", label: "All Products", icon: <AppstoreOutlined /> },
+      ...footerCategories.map((c) => ({
+        key: `cat-${c._id}`,
+        label: c.name,
+      })),
+    ]}
+    onClick={({ key }) => {
+      setOpen(false);
+      if (key === "shop") nav("/shop");
+      else nav("/shop?category=" + key.replace("cat-", ""));
+    }}
+  />
+
+  {/* Account */}
+  {isAuthenticated && (
+    <>
+      <div style={{ padding: "16px 20px 8px", fontSize: 11, letterSpacing: 2, color: "#999", fontWeight: 700 }}>
+        ACCOUNT
+      </div>
+      <Menu
+        mode="inline"
+        style={{ border: "none" }}
+        items={[
+          { key: "profile", label: "My Profile", icon: <UserOutlined /> },
+          { key: "orders", label: "My Orders", icon: <ShoppingOutlined /> },
+          { key: "wishlist", label: "Wishlist", icon: <HeartOutlined /> },
+        ]}
+        onClick={({ key }) => { setOpen(false); nav("/" + key); }}
+      />
+    </>
+  )}
+
+  {/* Logout */}
+  {isAuthenticated && (
+    <div style={{ padding: 16 }}>
+      <Button
+        block
+        danger
+        icon={<LogoutOutlined />}
+        onClick={() => { logout(); setOpen(false); nav("/"); }}
       >
-        <Menu
-          items={[
-            { key: "shop", label: "Shop" },
-            { key: "shoes", label: "Shoes" },
-            { key: "gym", label: "Gym & Supplements" },
-            { key: "fashion", label: "Fashion" },
-            { key: "cosmetics", label: "Cosmetics" },
-          ]}
-          onClick={({ key }) => {
-            setOpen(false);
-            nav("/shop?category=" + key);
-          }}
-        />
-      </Drawer>
+        Logout
+      </Button>
+    </div>
+  )}
+</Drawer>
     </Layout>
   );
 }

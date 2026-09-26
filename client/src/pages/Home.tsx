@@ -69,56 +69,52 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ marginTop: 64 }}>
-        <div className="section-title">
-          <h2>Shop by category</h2>
-          <Button type="link" onClick={() => nav("/shop")}>
-            View all
-          </Button>
-        </div>
-        <Row gutter={[16, 16]}>
-          {categories.map((c) => (
-            <Col xs={24} sm={12} md={6} key={c._id}>
-              <div
-                className="category-tile"
-                onClick={() => nav("/shop?category=" + c._id)}
-                style={{
-                  backgroundImage: c.image
-                    ? `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.75)), url(${c.image})`
-                    : undefined,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                <h3 style={{ margin: 0, color: "#fff" }}>{c.name}</h3>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </section>
+     {/* Categories */}
+<section style={{ marginTop: 40 }}>
+  <div className="section-title">
+    <h2 style={{ fontSize: 22, margin: 0 }}>Shop by category</h2>
+    <Button type="link" onClick={() => nav("/shop")}>
+      View all
+    </Button>
+  </div>
+  <div className="product-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+    {categories.map((c) => (
+      <div
+        key={c._id}
+        className="category-tile"
+        onClick={() => nav("/shop?category=" + c._id)}
+        style={{
+          backgroundImage: c.image
+            ? `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.75)), url(${c.image})`
+            : undefined,
+        }}
+      >
+        <h3 style={{ margin: 0, color: "#fff", fontSize: 16 }}>{c.name}</h3>
+      </div>
+    ))}
+  </div>
+</section>
 
-      {/* Featured picks — unchanged */}
-      <section style={{ marginTop: 64 }}>
-        <div className="section-title">
-          <div>
-            <h2>Featured picks</h2>
-            <p className="muted">
-              Selected products to start your NEXORA journey.
-            </p>
-          </div>
-        </div>
-        {loading ? (
-          <Spin size="large" />
-        ) : (
-          <Row gutter={[20, 20]}>
-            {products.map((p) => (
-              <Col xs={24} sm={12} lg={6} key={p._id}>
-                <ProductCard p={p} />
-              </Col>
-            ))}
-          </Row>
-        )}
-      </section>
+{/* Featured picks */}
+<section style={{ marginTop: 40 }}>
+  <div className="section-title">
+    <div>
+      <h2 style={{ fontSize: 22, margin: 0 }}>Featured picks</h2>
+      <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+        Selected products to start your NEXORA journey.
+      </p>
+    </div>
+  </div>
+  {loading ? (
+    <Spin size="large" />
+  ) : (
+    <div className="product-grid">
+      {products.map((p) => (
+        <ProductCard key={p._id} p={p} />
+      ))}
+    </div>
+  )}
+</section>
     </div>
   );
 }

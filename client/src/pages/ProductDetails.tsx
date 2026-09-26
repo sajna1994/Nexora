@@ -151,15 +151,30 @@ const handleWishlist = () => {
       </Button>
     )}
 
+   {/* Mobile sticky Add-to-cart bar */}
+<div className="mobile-sticky-cta">
+  <Button
+    shape="circle"
+    size="large"
+    icon={has(product._id) ? <HeartFilled /> : <HeartOutlined />}
+    onClick={handleWishlist}
+    style={{
+      color: has(product._id) ? "#c9a45c" : undefined,
+      borderColor: has(product._id) ? "#c9a45c" : undefined,
+    }}
+  />
+  {!isAdmin && (
     <Button
+      type="primary"
       size="large"
-      icon={has(product._id) ? <HeartFilled /> : <HeartOutlined />}
-      onClick={handleWishlist}
-      style={{
-        color: has(product._id) ? "#c9a45c" : undefined,
-        borderColor: has(product._id) ? "#c9a45c" : undefined,
-      }}
-    />
+      icon={<ShoppingOutlined />}
+      onClick={handleAdd}
+      style={{ flex: 1 }}
+    >
+      Add to cart · ₹{product.discountPrice ?? product.price}
+    </Button>
+  )}
+</div>
   </Space>
 </div>
 

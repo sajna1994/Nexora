@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Category from "../models/Category";
-import { requireAuth, requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../middleware/auth";
 
 const r = Router();
 

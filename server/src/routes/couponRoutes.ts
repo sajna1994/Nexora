@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Subscriber from "../models/Subscriber";
 import Order from "../models/Order";
-import { requireAuth, AuthRequest } from "../../middleware/auth";
+import { requireAuth, AuthRequest } from "../middleware/auth";
 
 const r = Router();
 

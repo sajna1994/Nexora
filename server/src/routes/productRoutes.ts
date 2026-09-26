@@ -2,7 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import Product from "../models/Product";
 import Category from "../models/Category";
-import { requireAuth, requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../middleware/auth";
 
 const r = Router();
 

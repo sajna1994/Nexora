@@ -4,7 +4,7 @@ import Order from "../models/Order";
 import Product from "../models/Product";
 import User from "../models/User";
 import Subscriber from "../models/Subscriber";
-import { requireAuth, requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../middleware/auth";
 
 const r = Router();
 

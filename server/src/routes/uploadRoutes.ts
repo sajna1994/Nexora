@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { requireAuth, requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../middleware/auth";
 
 const r = Router();
 

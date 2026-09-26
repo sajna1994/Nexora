@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Subscriber from "../models/Subscriber";
-import { requireAuth, requireAdmin } from "../../middleware/auth";
+import { requireAuth, requireAdmin } from "../middleware/auth";
 import crypto from "crypto";
 
 const r = Router();

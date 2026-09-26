@@ -18,13 +18,35 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ 
-  origin: [
-    "http://localhost:5173", 
-    process.env.CLIENT_URL // This will be set in Render
-  ].filter(Boolean) as string[],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const allowed = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+        process.env.CLIENT_URL, // your custom domain or specific Vercel URL
+      ].filter(Boolean) as string[];
+
+      // Allow exact matches
+      if (allowed.includes(origin)) return callback(null, true);
+
+      // Allow any Vercel preview / production URL for your project
+      if (
+        origin.endsWith(".vercel.app") &&
+        (origin.includes("nexora-") || origin.includes("sajna1"))
+      ) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 // Serve uploaded files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));  // ← ADD

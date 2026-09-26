@@ -24,27 +24,29 @@ app.use(
       // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
 
-      const allowed = [
+      const allowedExact = [
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
-        process.env.CLIENT_URL, // your custom domain or specific Vercel URL
+        process.env.CLIENT_URL,
       ].filter(Boolean) as string[];
 
-      // Allow exact matches
-      if (allowed.includes(origin)) return callback(null, true);
-
-      // Allow any Vercel preview / production URL for your project
-      if (
-        origin.endsWith(".vercel.app") &&
-        (origin.includes("nexora-") || origin.includes("sajna1"))
-      ) {
+      // Exact match
+      if (allowedExact.includes(origin)) {
         return callback(null, true);
       }
 
-      callback(new Error("Not allowed by CORS"));
+      // Any Vercel URL (preview, production, or alias)
+      if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(new Error(`CORS blocked: ${origin}`));
     },
-    credentials: true,
+    // DO NOT set credentials: true unless you use cookies for auth
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());

@@ -1,27 +1,29 @@
-import express from "express";
-import cors from "cors";
+// ── 1. Load env vars FIRST, before any other imports ──
 import dotenv from "dotenv";
+dotenv.config();
+
+// ── 2. Now import everything else ─────────────────────
+import express from "express";
+import uploadRoutes from "./routes/uploadRoutes";  
+import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
+
 import productRoutes from "./routes/productRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import authRoutes from "./routes/authRoutes";
 import customerRoutes from "./routes/customerRoutes";
 import newsletterRoutes from "./routes/newsletterRoutes";
-import uploadRoutes from "./routes/uploadRoutes";   // ← ADD
 import couponRoutes from "./routes/couponRoutes";
 import userRoutes from "./routes/userRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
-
-dotenv.config();
 
 const app = express();
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
 
       const allowedExact = [
@@ -31,12 +33,8 @@ app.use(
         process.env.CLIENT_URL,
       ].filter(Boolean) as string[];
 
-      // Exact match
-      if (allowedExact.includes(origin)) {
-        return callback(null, true);
-      }
+      if (allowedExact.includes(origin)) return callback(null, true);
 
-      // Any Vercel URL (preview, production, or alias)
       if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) {
         return callback(null, true);
       }
@@ -44,14 +42,13 @@ app.use(
       console.warn(`[CORS] Blocked origin: ${origin}`);
       callback(new Error(`CORS blocked: ${origin}`));
     },
-    // DO NOT set credentials: true unless you use cookies for auth
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
-// Serve uploaded files
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));  // ← ADD
+
 app.get("/api/health", (_, res) =>
   res.json({ ok: true, service: "NEXORA API" })
 );
@@ -62,7 +59,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/newsletter", newsletterRoutes);
-app.use("/api/upload", uploadRoutes);   // ← ADD
+app.use("/api/upload", uploadRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
